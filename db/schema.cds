@@ -1,69 +1,67 @@
-namespace com.satinfotech.hackathon;
-
-// Define BusinessPartner entity
-entity BusinessPartner {
-    key BusinessPartnerNumber : UUID;
-    Name : String;
-    Address1 : String;
-    Address2 : String;
-    City : String;
-    State : String @cds.persistence.skip;
-    PINCode : String @cds.validate.pattern: '^[0-9]{6}$'; // PINCode validation
-    Is_gstn_registered : Boolean;
-    GSTINNumber : String @cds.validate.pattern: '/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$/';
-    IsVendor : Boolean;
-    IsCustomer : Boolean;
+namespace com.test.sdb;
+using {cuid} from '@sap/cds/common';
+@assert.unique:{
+    bp_no:[bp_no]
+}
+entity Business_Partner {
+    key ID: UUID;
+    bp_no:String(6);
+    @title:'Name'
+    name:String(20);
+ @title:'Address 1'
+    add1:String(70);
+ @title:'Address 2'
+    add2:String(70);
+    @title:'City'
+    city:String(20);
+     @title:'State'
+    state:Association to States;
+     @title:'pin code'
+    pinCode:String(10);
+    @title:' Is_gstn_registered'
+     Is_gstn_registered:Boolean default false;
+       @title:' GSTIN number'
+     Gst_num:String(20);
+       @title:' is vendor'
+    Is_vendor:Boolean default false;
+      @title:' is customer'
+    Is_customer:Boolean default false;
 }
 
-// Define Store entity
 entity Store {
-    key StoreID : UUID;
-    Name : String;
-    Address1 : String;
-    Address2 : String;
-    City : String;
-    State : String @cds.persistence.skip;
-    PINCode : String @cds.validate.pattern: '^[0-9]{6}$'; // PINCode validation using CDS annotation
+    key ID: UUID;
+    store_id :String(10);
+    name         : String(100);
+    add1     : String(255);
+    add2     : String(255);
+    city         : String(100);
+    state        : Association to States;
+    PinCode      : String(10) @(assert.format: '^[1-9][0-9]{5}$');
 }
 
-// Define Product entity
 entity Product {
-    key ProductID : UUID;
-    ProductName : String;
-    ProductImageURL : String @cds.validate.url; // Validate as a URL using CDS annotation
-    ProductCostPrice : Decimal(15,2);
-    ProductSellPrice : Decimal(15,2);
+    key ID: UUID;
+    p_id           : String(20); 
+    name     : String(100);
+    imageURL        : String(255);
+    costPrice       : Decimal(15, 2); 
+    sellPrice       : Decimal(15, 2); 
+}
+
+
+entity Stock {
+    key ID            : UUID;
+    storeId         : Association to Store;
+    productId       : Association to Product;
+    stock_qty        : Integer;
+}
+
+
+@cds.persistence.skip
+entity States {
+    @title:'code'
+    key code: String(3);
+    @title:'description'
+    description:String(10);
     
-    }
-
-// Define StockData entity
-entity StockData {
-    key StockID : UUID;
-    store_id : Association to Store;
-    product_id : Association to Product;
-    stock_qty : Integer;
-}
-
-// Define PurchaseApp entity
-entity PurchaseApp {
-    key PurchaseOrderNumber : UUID;
-    BusinessPartner : Association to BusinessPartner;
-    PurchaseOrderDate : DateTime;
-    Items : Composition of many{
-        key product_id: UUID;
-        qty :Association to Items;
-        price:
-    }
-}
-
-
-
-// Define SalesApp entity
-entity SalesApp{
-    key SalesOrderNumber : UUID;
-    BusinessPartner : Association to BusinessPartner;
-    SalesDate : DateTime;
-    Items : Composition of many Items on Items.parent;
-}
-    store_id : Association to Store;
 }
